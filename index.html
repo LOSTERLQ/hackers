@@ -1,0 +1,167 @@
+import sys
+import random
+import pygame
+from PIL import ImageGrab
+import ctypes
+
+def hide_from_taskbar():
+    hwnd = ctypes.windll.user32.GetForegroundWindow()
+    style = ctypes.windll.user32.GetWindowLongW(hwnd, -20)
+    style |= 0x00000080
+    style &= ~0x00040000
+    ctypes.windll.user32.SetWindowLongW(hwnd, -20, style)
+
+def run_prank():
+    pygame.init()
+    pygame.mixer.init()
+    
+    screenshot = ImageGrab.grab()
+    screen_width, screen_height = screenshot.size
+    
+    screenshot_rgba = screenshot.convert("RGBA")
+    mode = screenshot_rgba.mode
+    size = screenshot_rgba.size
+    data = screenshot_rgba.tobytes()
+    
+    bg_surface = pygame.image.fromstring(data, size, mode)
+    
+    screen = pygame.display.set_mode((screen_width, screen_height), pygame.FULLSCREEN | pygame.NOFRAME)
+    pygame.mouse.set_visible(True)
+    
+    hide_from_taskbar()
+    
+    num_pieces = 15
+    pieces = []
+    
+    for _ in range(num_pieces):
+        w = random.randint(60, 100)
+        h = random.randint(60, 100)
+        x = random.randint(0, screen_width - w)
+        y = random.randint(0, screen_height - h)
+        
+        sub_image = bg_surface.subsurface(pygame.Rect(x, y, w, h)).copy()
+        
+        vx = random.choice([-3, -2, 2, 3])
+        vy = random.choice([-3, -2, 2, 3])
+        
+        pieces.append({
+            'img': sub_image,
+            'x': x,
+            'y': y,
+            'vx': vx,
+            'vy': vy,
+            'w': w,
+            'h': h
+        })
+        
+    font_main = pygame.font.SysFont("Arial", 50, bold=True)
+    text_surface = font_main.render("Я внутри твоего ПК", True, (255, 0, 0))
+    text_rect = text_surface.get_rect(center=(screen_width // 2, screen_height // 2))
+    
+    clock = pygame.time.Clock()
+    
+    state = 'prank'
+    
+    intro_lines = [
+        "ВНИМАНИЕ...", "ОБНАРУЖЕНА КРИТИЧЕСКАЯ ОШИБКА...", "ХОТЯ СТОП.", "ПОСМОТРИ НА ЭКРАН.", 
+        "ТЫ РЕАЛЬНО ПОВЕРИЛ?", "ТЕБЯ ЗАБЛОКИРОВАЛИ?", "НЕТ, ДРУГ.", "ТЕБЯ ПРОСТО ЗАСКАМИЛИ!", 
+        "ТЫ ПРОИГРАЛ ЭТОТ РАУНД!", "ТЫ ПОВЕЛСЯ НА СТАРЫЙ ТРЮК!", "ДОСТУП К ТВОИМ СЕКРЕТАМ...", 
+        "УСПЕШНО СКОПИРОВАН (НЕТ).", "ВСЕ ТВОИ ИГРЫ...", "УДАЛЕНЫ (ТОЖЕ НЕТ).", 
+        "ЭТО ВСЕГО ЛИШЬ ПРАНК!", "БЕЗОБИДНАЯ ШУТКА.", "НИ ОДИН ФАЙЛ НЕ ПОСТРАДАЛ.", 
+        "ТВОЙ КОМПЬЮТЕР В БЕЗОПАСНОСТИ.", "WHITE HAT HACKING В ДЕЙСТВИИ.", "СИСТЕМА ЧИСТА.", 
+        "ТЫ ИСКАЛ ФАЙЛ НА САЙТЕ?", "КРУТИЛ 5 МЕТРОВ ВНИЗ?", "И ВСЕ РАДИ ЭТОГО?", 
+        "НУ ТЫ ДАЕШЬ!", "МИССИЯ УСПЕШНО ВЫПОЛНЕНА.", "АВТОР СКРИПТА: ТВОЙ ДРУГ.", 
+        "С ТЕБЯ СОК ИЛИ ПИЦЦА!", "ЭТО БЫЛ ТЕСТ НА БДИТЕЛЬНОСТЬ.", "ТЕСТ ПРОВАЛЕН!", 
+        "В СЛЕДУЮЩИЙ РАЗ БУДЬ ОСТРОЖНЕЕ.", "НЕ СКАЧИВАЙ СТРАННЫЕ ФАЙЛЫ.", "ДАЖЕ ЕСЛИ ТАМ МАТРИЦА.", 
+        "КОД НАПИСАН НА PYTHON.", "БЕЗ ВИРУСОВ.", "БЕЗ МАЛВАРЕ.", "ПРОСТО ФАН.", 
+        "КОНЕЦ ТИТРОВ.", "КЛИКНИ НА КНОПКУ НИЖЕ", "ЧТОБЫ ВЕРНУТЬ ВСЁ НАЗАД"
+    ]
+    
+    font_intro = pygame.font.SysFont("Courier New", 30, bold=True)
+    
+    rendered_lines = []
+    current_y = screen_height + 20
+    
+    for line in intro_lines:
+        color = (0, 255, 0) if "УСПЕШНО" in line or "БЕЗОПАСНОСТИ" in line else (255, 255, 255)
+        if "ЗАСКАМИЛИ" in line or "ПРОИГРАЛ" in line or "ПОВЕЛСЯ" in line or "ВНИМАНИЕ" in line:
+            color = (255, 0, 0)
+            
+        surf = font_intro.render(line, True, color)
+        rect = surf.get_rect(centerx=screen_width // 2)
+        rect.y = current_y
+        rendered_lines.append((surf, rect))
+        current_y += 50
+        
+    btn_font = pygame.font.SysFont("Arial", 24, bold=True)
+    btn_text = btn_font.render("ЗАКОНЧИТЬ", True, (255, 255, 255))
+    btn_rect = pygame.Rect(0, 0, 200, 60)
+    btn_rect.center = (screen_width // 2, current_y + 40)
+    
+    final_font = pygame.font.SysFont("Arial", 36, bold=True)
+    final_text = final_font.render("Бро, мне нужно идти к другому челу, так как у тебя ничего нет вкусного (Нажми F6)", True, (255, 255, 255))
+    final_rect = final_text.get_rect(center=(screen_width // 2, screen_height // 2))
+    
+    running = True
+    
+    while running:
+        mouse_pos = pygame.mouse.get_pos()
+        mouse_clicked = False
+        
+        for event in pygame.event.get():
+            if event.type == pygame.KEYDOWN:
+                if state == 'prank' and event.key == pygame.K_F6:
+                    state = 'intro'
+                    try:
+                        pygame.mixer.music.load("music.mp3")
+                        pygame.mixer.music.set_volume(0.4)
+                        pygame.mixer.music.play()
+                    except:
+                        pass
+                elif state == 'final_screen' and event.key == pygame.K_F6:
+                    running = False
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    mouse_clicked = True
+                    
+        if state == 'prank':
+            screen.blit(bg_surface, (0, 0))
+            for p in pieces:
+                p['x'] += p['vx']
+                p['y'] += p['vy']
+                if p['x'] <= 0 or p['x'] + p['w'] >= screen_width: p['vx'] *= -1
+                if p['y'] <= 0 or p['y'] + p['h'] >= screen_height: p['vy'] *= -1
+                screen.blit(p['img'], (p['x'], p['y']))
+            screen.blit(text_surface, text_rect)
+            
+        elif state == 'intro':
+            screen.fill((0, 0, 0))
+            
+            if btn_rect.y > screen_height // 2 + 100:
+                for surf, rect in rendered_lines:
+                    rect.y -= 2
+                btn_rect.y -= 2
+            
+            for surf, rect in rendered_lines:
+                if rect.bottom > 0 and rect.top < screen_height:
+                    screen.blit(surf, rect)
+                    
+            pygame.draw.rect(screen, (255, 0, 0), btn_rect, border_radius=5)
+            screen.blit(btn_text, btn_text.get_rect(center=btn_rect.center))
+            
+            if mouse_clicked and btn_rect.collidepoint(mouse_pos):
+                state = 'final_screen'
+                pygame.mixer.music.stop()
+                
+        elif state == 'final_screen':
+            screen.fill((20, 20, 20))
+            screen.blit(final_text, final_rect)
+            
+        pygame.display.flip()
+        clock.tick(60)
+        
+    pygame.quit()
+    sys.exit()
+
+if __name__ == "__main__":
+    run_prank()
