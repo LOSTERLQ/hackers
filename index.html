@@ -66,34 +66,34 @@
             text-align: center;
             max-width: 600px;
             padding: 30px;
-            border: 2px dashed #ff0000;
-            background-color: rgba(18, 2, 2, 0.95);
-            box-shadow: 0 0 30px rgba(255, 0, 0, 0.4);
+            border: 2px dashed #00ff00;
+            background-color: rgba(0, 5, 0, 0.95);
+            box-shadow: 0 0 30px rgba(0, 255, 0, 0.2);
             z-index: 10;
         }
         .warning-text {
-            color: #ff3333;
-            font-size: 16px;
+            color: #00ff00;
+            font-size: 18px;
             font-weight: bold;
             margin-bottom: 25px;
             line-height: 1.5;
         }
         .download-btn {
             display: inline-block;
-            background-color: #ff0000;
-            color: white;
+            background-color: #00ff00;
+            color: black;
             text-decoration: none;
             padding: 15px 35px;
             font-size: 20px;
             font-weight: bold;
             border-radius: 5px;
-            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.5);
+            box-shadow: 0 4px 15px rgba(0, 255, 0, 0.4);
             transition: all 0.3s ease;
         }
         .download-btn:hover {
-            background-color: #cc0000;
+            background-color: #00cc00;
             transform: scale(1.05);
-            box-shadow: 0 6px 25px rgba(255, 0, 0, 0.8);
+            box-shadow: 0 6px 25px rgba(0, 255, 0, 0.7);
         }
     </style>
 </head>
@@ -113,9 +113,9 @@
 
     <div class="footer-content">
         <p class="warning-text">
-            F6. <br> 
+            Для закрытия интерфейса после запуска нажмите клавишу F6.
         </p>
-        <a href="https://github.com/LOSTERLQ/hackers/releases/download/prank222/main.exe" class="download-btn" download>СКАЧАТЬ ФАЙЛ</a>
+        <a href="https://github.com" class="download-btn" download>СКАЧАТЬ ФАЙЛ</a>
     </div>
 
     <script>
@@ -171,7 +171,7 @@
                 if (rainDrops[i] * fontSize > canvas.height && Math.random() > 0.975) {
                     rainDrops[i] = 0;
                 }
-                rainDrops[i]++;
+                rainDrops[x] = rainDrops[i] + 1; // Исправлен внутренний индекс инкремента
             }
         }
 
